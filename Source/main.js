@@ -1,20 +1,48 @@
 function main()
 {
-	var schedules = Schedule.Instances()._All;
+	var filePath = "../Data/Geonames_dot_org-US_Postal_Codes-Compressed.csv.txt";
+	new TextStringFromFile(filePath).load(main_PostalCodesFileLoaded);
+}
 
-	function zonesFromCodeRange(min, max)
+function main_PostalCodesFileLoaded(postalCodesAsTextCsvCompressed)
+{
+	var provinces = [];
+
+	var postalCodesAsLinesCsv = postalCodesAsTextCsvCompressed.split("\n");
+	var provinceCodePrev = null;
+	var province = null;
+	for (var i = 0; i < postalCodesAsLinesCsv.length; i++)
 	{
-		var zones = [];
-		for (var i = min; i <= max; i++)
+		var postalCodeAsLineCsv = postalCodesAsLinesCsv[i];
+		if (postalCodeAsLineCsv.startsWith("//") == false)
 		{
-			var zone = new Zone("" + i);
-			zones.push(zone);
+			var postalCodeAsFields = postalCodeAsLineCsv.split(",");
+
+			var postalCode = postalCodeAsFields[1];
+
+			var provinceCode = postalCodeAsFields[4];
+			if (provinceCode == "")
+			{
+				provinceCode = provinceCodePrev;
+			}
+			else
+			{
+				var provinceName = postalCodeAsFields[3];
+				province = new Province(provinceCode, provinceName, []);
+				provinces.push(province);
+			}
+
+			var zoneLatitude = parseFloat(postalCodeAsFields[7]);
+			var zoneLongitude = parseFloat(postalCodeAsFields[8]);
+			var zoneGeo = new Geodesic(zoneLatitude, zoneLongitude);
+			var zone = new Zone(postalCode, zoneGeo);
+			province.zones.push(zone);
+
+			provinceCodePrev = provinceCode;
 		}
-		return zones;
 	}
 
-	var countryUsProvinces = 
-	[
+	/*
 		new Province("AK", "Alaska", 		zonesFromCodeRange( 99500, 99999 ) ),
 		new Province("AL", "Alabama", 		zonesFromCodeRange( 35000, 36999 ) ),
 		new Province("AR", "Arkansas", 		zonesFromCodeRange( 71600, 72999 ) ),
@@ -67,11 +95,14 @@ function main()
 		new Province("WV", "West Virginia", zonesFromCodeRange( 24700, 26999 ) ),
 		new Province("WY", "Wyoming", 		zonesFromCodeRange( 82000, 83199 ) )
 	];
+	*/
 
 	var countries =
 	[
-		new Country("US", "United States of America", countryUsProvinces)
+		new Country("US", "United States of America", provinces)
 	];
+
+	var schedules = Schedule.Instances()._All;
 
 	var currencies =
 	[

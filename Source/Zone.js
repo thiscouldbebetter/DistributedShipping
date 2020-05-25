@@ -1,6 +1,6 @@
 
-function Zone(code, boundaryVertices)
+function Zone(code, geodesic)
 {
 	this.code = code;
-	this.boundaryVertices = boundaryVertices;
+	this.geodesic = geodesic;
 }
