@@ -84,7 +84,7 @@ function DomHelper()
 		var returnValue = this.d.createElement("input");
 		returnValue.id = id;
 		returnValue.value = valueBinding.get();
-		returnValue.onchange = valueBinding.set(returnValue.value);
+		returnValue.onchange = () => valueBinding.set(returnValue.value);
 		if (widthInPixels != null)
 		{
 			returnValue.style.width = widthInPixels + "px";
@@ -98,7 +98,7 @@ function DomHelper()
 		returnValue.id = id;
 		returnValue.type = "checkbox";
 		returnValue.checked = valueBinding.get();
-		returnValue.onchange = valueBinding.set(returnValue.checked);
+		returnValue.onchange = () => valueBinding.set(returnValue.value);
 		return returnValue;
 	};
 
@@ -108,7 +108,10 @@ function DomHelper()
 		returnValue.id = id;
 		returnValue.type = "number";
 		returnValue.value = valueBinding.get();
-		returnValue.onchange = valueBinding.set(returnValue.value);
+		returnValue.onchange = () =>
+		{
+			valueBinding.set(returnValue.value);
+		};
 		if (widthInPixels != null)
 		{
 			returnValue.style.width = widthInPixels + "px";
@@ -116,12 +119,13 @@ function DomHelper()
 		return returnValue;
 	};
 
-	DomHelper.prototype.inputPassword = function(id, value)
+	DomHelper.prototype.inputPassword = function(id, valueBinding)
 	{
 		var returnValue = this.d.createElement("input");
 		returnValue.id = id;
 		returnValue.type = "password";
-		returnValue.value = value;
+		returnValue.value = valueBinding.get();
+		returnValue.onchange = () => valueBinding.set(returnValue.value);
 		returnValue.style.width = "96px";
 		return returnValue;
 	};

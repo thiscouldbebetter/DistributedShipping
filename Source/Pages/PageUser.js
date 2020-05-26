@@ -83,6 +83,7 @@ function PageUser(world, user)
 
 		if (this.user.isAdmin)
 		{
+			controls.push(dh.br());
 			controls.push
 			(
 				dh.button

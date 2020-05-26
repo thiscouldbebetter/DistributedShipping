@@ -4,7 +4,7 @@ function PageMap(world, user)
 	this.world = world;
 	this.user = user;
 
-	this.canvasSize = new Coords(600, 400);
+	this.canvasSize = new Coords(600, 600);
 
 	var country = this.world.countries["US"]; // hack
 	var provinces = country.provinces;
@@ -22,21 +22,29 @@ function PageMap(world, user)
 	var zoneLongitudeMax = Math.max.apply(null, zoneLongitudes);
 	this.zoneGeodesicMin = new Coords(zoneLongitudeMin, zoneLatitudeMin);
 	var zoneGeodesicMax = new Coords(zoneLongitudeMax, zoneLatitudeMax);
-	this.zoneGeodesicRange = zoneGeodesicMax.clone().subtract(this.zoneGeodesicMin);
+	this.viewSizeInDegrees = zoneGeodesicMax.clone().subtract(this.zoneGeodesicMin);
 
-	this.viewSizeInDegrees = this.zoneGeodesicRange.clone();
 	this.viewCenterInDegrees = this.zoneGeodesicMin.clone().add
 	(
 		this.viewSizeInDegrees.clone().divideScalar(2)
 	);
+
+	if (this.viewSizeInDegrees.x > this.viewSizeInDegrees.y)
+	{
+		this.viewSizeInDegrees.y = this.viewSizeInDegrees.x;
+	}
+	else
+	{
+		this.viewSizeInDegrees.x = this.viewSizeInDegrees.y;
+	}
 	this.showZoneCodes = false;
 
-	var margin = .05;
-	this.margins = new Coords(margin, margin);
-	var marginDoubledReversed = 1 - margin * 2;
+	var marginAsFraction = .05;
+	this.marginsAsFractions = new Coords(marginAsFraction, marginAsFraction);
+	var marginAsFractionDoubledReversed = 1 - marginAsFraction * 2;
 	this.canvasSizeMinusMargins = this.canvasSize.clone().multiply
 	(
-		new Coords(1, 1).multiplyScalar(marginDoubledReversed)
+		new Coords(1, 1).multiplyScalar(marginAsFractionDoubledReversed)
 	);
 }
 
@@ -56,13 +64,16 @@ function PageMap(world, user)
 			{
 				return new Coords().fromGeodesic(x).subtract
 				(
-					this.zoneGeodesicMin
+					this.viewCenterInDegrees
+				).add
+				(
+					this.viewSizeInDegrees.clone().divideScalar(2)
 				).divide
 				(
-					this.zoneGeodesicRange
+					this.viewSizeInDegrees
 				).yReverse().add
 				(
-					this.margins
+					this.marginsAsFractions
 				).multiply
 				(
 					this.canvasSizeMinusMargins
@@ -80,7 +91,7 @@ function PageMap(world, user)
 			g.strokeRect(drawPos.x, drawPos.y, 1, 1);
 			if (this.showZoneCodes)
 			{
-				g.fillText(zone.code, drawPos.x, drawPos.y)
+				g.fillText(zone.code, drawPos.x, drawPos.y);
 			}
 		}
 
@@ -102,20 +113,10 @@ function PageMap(world, user)
 			dh.label("View:"),
 
 			dh.label("Size in Degrees:"),
+			dh.label("Latitude:"),
 			dh.inputNumber
 			(
-				"inputViewSizeX",
-				new DataBinding
-				(
-					this,
-					(c) => c.viewSizeInDegrees.x,
-					(c, v) => c.viewSizeInDegrees.x = v
-				)
-			), 
-			dh.label("x"),
-			dh.inputNumber
-			(
-				"inputViewSizeY",
+				"inputViewSizeInDegreesY",
 				new DataBinding
 				(
 					this,
@@ -123,30 +124,35 @@ function PageMap(world, user)
 					(c, v) => c.viewSizeInDegrees.y = v
 				)
 			), 
-
-			dh.button
-			(
-				"Zoom In",
-				() =>
-				{
-					this.viewSizeInDegrees.divideScalar(2);
-					this.draw(g)
-				}
-			),
-			dh.button
-			(
-				"Zoom Out",
-				() =>
-				{
-					this.viewSizeInDegrees.multiplyScalar(2);
-					this.draw(g)
-				}
-			),
-
-			dh.label("Center in Degrees:"),
+			dh.label("Longitude:"),
 			dh.inputNumber
 			(
-				"inputViewCenterX",
+				"inputViewSizeInDegreesX",
+				new DataBinding
+				(
+					this,
+					(c) => c.viewSizeInDegrees.x,
+					(c, v) => c.viewSizeInDegrees.x = v
+				)
+			), 
+			dh.br(),
+
+			dh.label("Center in Degrees:"),
+			dh.label("Latitude:"),
+			dh.inputNumber
+			(
+				"inputViewCenterInDegreesY",
+				new DataBinding
+				(
+					this,
+					(c) => c.viewCenterInDegrees.y,
+					(c, v) => c.viewCenterInDegrees.y = v
+				)
+			),
+			dh.label("Longitude:"),
+			dh.inputNumber
+			(
+				"inputViewCenterInDegreesX",
 				new DataBinding
 				(
 					this,
@@ -154,17 +160,88 @@ function PageMap(world, user)
 					(c, v) => c.viewCenterInDegrees.x = v
 				)
 			), 
-			dh.label("x"),
-			dh.inputNumber
+			dh.br(),
+
+			dh.button("&nbsp;", () => {}),
+			dh.button
 			(
-				"inputViewCenterY",
-				new DataBinding
-				(
-					this,
-					(c) => c.viewCenterInDegrees.y,
-					(c, v) => c.viewCenterInDegrees.y = v
-				)
-			), 
+				"^",
+				() =>
+				{
+					var input = dh.get("inputViewCenterInDegreesY");
+					input.value = parseFloat(input.value) + this.viewSizeInDegrees.y * .1;
+					input.onchange();
+					this.draw(g);
+				}
+			),
+			dh.button
+			(
+				"Out",
+				() =>
+				{
+					var inputX = dh.get("inputViewSizeInDegreesX");
+					var inputY = dh.get("inputViewSizeInDegreesY");
+					inputX.value = parseFloat(inputX.value) * 2;
+					inputY.value = parseFloat(inputY.value) * 2;
+					inputX.onchange();
+					inputY.onchange();
+					this.draw(g);
+				}
+			),
+			dh.br(),
+
+			dh.button
+			(
+				"<",
+				() =>
+				{
+					var input = dh.get("inputViewCenterInDegreesX");
+					input.value = parseFloat(input.value) - this.viewSizeInDegrees.x * .1;
+					input.onchange();
+					this.draw(g);
+				}
+			),
+			dh.button("&nbsp;", () => {}),
+			dh.button
+			(
+				">",
+				() =>
+				{
+					var input = dh.get("inputViewCenterInDegreesX");
+					input.value = parseFloat(input.value) + this.viewSizeInDegrees.x * .1;
+					input.onchange();
+					this.draw(g);
+				}
+			),
+			dh.br(),
+
+			dh.button("&nbsp;", () => {}),
+			dh.button
+			(
+				"v",
+				() =>
+				{
+					var input = dh.get("inputViewCenterInDegreesY");
+					input.value = parseFloat(input.value) - this.viewSizeInDegrees.y * .1;
+					input.onchange();
+					this.draw(g);
+				}
+			),
+			dh.button
+			(
+				"In",
+				() =>
+				{
+					var inputX = dh.get("inputViewSizeInDegreesX");
+					var inputY = dh.get("inputViewSizeInDegreesY");
+					inputX.value = parseFloat(inputX.value) / 2;
+					inputY.value = parseFloat(inputY.value) / 2;
+					inputX.onchange();
+					inputY.onchange();
+					this.draw(g);
+				}
+			),
+			dh.br(),
 
 			dh.label("Show Zone Codes"),
 			dh.inputCheckbox
@@ -174,7 +251,11 @@ function PageMap(world, user)
 				(
 					this,
 					(c) => c.showZoneCodes,
-					(c, v) => c.showZoneCodes = v
+					(c, v) =>
+					{
+						c.showZoneCodes = v;
+						c.draw(g);
+					}
 				)
 			),
 
