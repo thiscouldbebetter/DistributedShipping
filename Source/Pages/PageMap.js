@@ -5,6 +5,39 @@ function PageMap(world, user)
 	this.user = user;
 
 	this.canvasSize = new Coords(600, 400);
+
+	var country = this.world.countries["US"]; // hack
+	var provinces = country.provinces;
+	var provincesToExclude = [ "AK", "HI", "MH" ]; // hack
+	provinces = provinces.filter(x => provincesToExclude.indexOf(x.code) == -1);
+	var zonesForProvinces = provinces.map(x => x.zones);
+	this.zones = [].concat.apply([], zonesForProvinces);
+
+	this.zoneGeodesics = this.zones.map((x) => x.geodesic);
+	var zoneLatitudes = this.zoneGeodesics.map((x) => x.latitude);
+	var zoneLongitudes = this.zoneGeodesics.map((x) => x.longitude);
+	var zoneLatitudeMin = Math.min.apply(null, zoneLatitudes);
+	var zoneLatitudeMax = Math.max.apply(null, zoneLatitudes);
+	var zoneLongitudeMin = Math.min.apply(null, zoneLongitudes);
+	var zoneLongitudeMax = Math.max.apply(null, zoneLongitudes);
+	this.zoneGeodesicMin = new Coords(zoneLongitudeMin, zoneLatitudeMin);
+	var zoneGeodesicMax = new Coords(zoneLongitudeMax, zoneLatitudeMax);
+	this.zoneGeodesicRange = zoneGeodesicMax.clone().subtract(this.zoneGeodesicMin);
+
+	this.viewSizeInDegrees = this.zoneGeodesicRange.clone();
+	this.viewCenterInDegrees = this.zoneGeodesicMin.clone().add
+	(
+		this.viewSizeInDegrees.clone().divideScalar(2)
+	);
+	this.showZoneCodes = false;
+
+	var margin = .05;
+	this.margins = new Coords(margin, margin);
+	var marginDoubledReversed = 1 - margin * 2;
+	this.canvasSizeMinusMargins = this.canvasSize.clone().multiply
+	(
+		new Coords(1, 1).multiplyScalar(marginDoubledReversed)
+	);
 }
 
 {
@@ -17,55 +50,38 @@ function PageMap(world, user)
 		g.strokeStyle = "Gray";
 		g.strokeRect(0, 0, this.canvasSize.x, this.canvasSize.y);
 
-		var country = this.world.countries[0]; // hack
-		var provinces = country.provinces;
-		var provincesToExclude = [ "AK", "HI", "MH" ];
-		provinces = provinces.filter(x => provincesToExclude.indexOf(x.code) == -1);
-		var zonesForProvinces = provinces.map(x => x.zones);
-		var zones = [].concat.apply([], zonesForProvinces);
-
-		var zoneGeodesics = zones.map((x) => x.geodesic);
-		var zoneLatitudes = zoneGeodesics.map((x) => x.latitude);
-		var zoneLongitudes = zoneGeodesics.map((x) => x.longitude);
-		var zoneLatitudeMin = Math.min.apply(null, zoneLatitudes);
-		var zoneLatitudeMax = Math.max.apply(null, zoneLatitudes);
-		var zoneLongitudeMin = Math.min.apply(null, zoneLongitudes);
-		var zoneLongitudeMax = Math.max.apply(null, zoneLongitudes);
-		var zoneGeodesicMin = new Coords(zoneLongitudeMin, zoneLatitudeMin);
-		var zoneGeodesicMax = new Coords(zoneLongitudeMax, zoneLatitudeMax);
-		var zoneGeodesicRange = zoneGeodesicMax.clone().subtract(zoneGeodesicMin);
-		var margin = .05;
-		var margins = new Coords(margin, margin);
-		var marginDoubledReversed = 1 - margin * 2;
-		var canvasSizeMinusMargins = this.canvasSize.clone().multiply
-		(
-			new Coords(1, 1).multiplyScalar(marginDoubledReversed)
-		);
-
-		var zoneGeodesicsToDraw = zoneGeodesics.map
+		var zoneGeodesicsToDraw = this.zoneGeodesics.map
 		(
 			x =>
 			{
 				return new Coords().fromGeodesic(x).subtract
 				(
-					zoneGeodesicMin
+					this.zoneGeodesicMin
 				).divide
 				(
-					zoneGeodesicRange
+					this.zoneGeodesicRange
 				).yReverse().add
 				(
-					margins
+					this.margins
 				).multiply
 				(
-					canvasSizeMinusMargins
+					this.canvasSizeMinusMargins
 				);
 			}
 		);
 
-		for (var i = 0; i < zoneGeodesicsToDraw.length; i++)
+		g.fillStyle = "Gray";
+		for (var i = 0; i < this.zones.length; i++)
 		{
+			var zone = this.zones[i];
+
 			var drawPos = zoneGeodesicsToDraw[i];
+
 			g.strokeRect(drawPos.x, drawPos.y, 1, 1);
+			if (this.showZoneCodes)
+			{
+				g.fillText(zone.code, drawPos.x, drawPos.y)
+			}
 		}
 
 	};
@@ -83,7 +99,90 @@ function PageMap(world, user)
 		([
 			dh.heading("System Map"),
 
-			canvasMap,
+			dh.label("View:"),
+
+			dh.label("Size in Degrees:"),
+			dh.inputNumber
+			(
+				"inputViewSizeX",
+				new DataBinding
+				(
+					this,
+					(c) => c.viewSizeInDegrees.x,
+					(c, v) => c.viewSizeInDegrees.x = v
+				)
+			), 
+			dh.label("x"),
+			dh.inputNumber
+			(
+				"inputViewSizeY",
+				new DataBinding
+				(
+					this,
+					(c) => c.viewSizeInDegrees.y,
+					(c, v) => c.viewSizeInDegrees.y = v
+				)
+			), 
+
+			dh.button
+			(
+				"Zoom In",
+				() =>
+				{
+					this.viewSizeInDegrees.divideScalar(2);
+					this.draw(g)
+				}
+			),
+			dh.button
+			(
+				"Zoom Out",
+				() =>
+				{
+					this.viewSizeInDegrees.multiplyScalar(2);
+					this.draw(g)
+				}
+			),
+
+			dh.label("Center in Degrees:"),
+			dh.inputNumber
+			(
+				"inputViewCenterX",
+				new DataBinding
+				(
+					this,
+					(c) => c.viewCenterInDegrees.x,
+					(c, v) => c.viewCenterInDegrees.x = v
+				)
+			), 
+			dh.label("x"),
+			dh.inputNumber
+			(
+				"inputViewCenterY",
+				new DataBinding
+				(
+					this,
+					(c) => c.viewCenterInDegrees.y,
+					(c, v) => c.viewCenterInDegrees.y = v
+				)
+			), 
+
+			dh.label("Show Zone Codes"),
+			dh.inputCheckbox
+			(
+				"checkboxShowCodes",
+				new DataBinding
+				(
+					this,
+					(c) => c.showZoneCodes,
+					(c, v) => c.showZoneCodes = v
+				)
+			),
+
+			dh.div
+			(
+				[ canvasMap ],
+				false // hasBorder
+			),
 			dh.br(),
 
 			dh.button

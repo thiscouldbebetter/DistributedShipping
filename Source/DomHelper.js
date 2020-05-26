@@ -38,9 +38,13 @@ function DomHelper()
 		return returnValue;
 	};
 
-	DomHelper.prototype.div = function(children, hasBorder)
+	DomHelper.prototype.div = function(children, hasBorder, id)
 	{
 		var returnValue = this.d.createElement("div");
+		if (id != null)
+		{
+			returnValue.id = id;
+		}
 		for (var i = 0; i < children.length; i++)
 		{
 			var child = children[i];
@@ -75,13 +79,6 @@ function DomHelper()
 		return returnValue;
 	};
 
-	DomHelper.prototype.label = function(innerHtml)
-	{
-		var returnValue = this.d.createElement("label");
-		returnValue.innerHTML = innerHtml;
-		return returnValue;
-	};
-
 	DomHelper.prototype.input = function(id, valueBinding, widthInPixels)
 	{
 		var returnValue = this.d.createElement("input");
@@ -92,6 +89,16 @@ function DomHelper()
 		{
 			returnValue.style.width = widthInPixels + "px";
 		}
+		return returnValue;
+	};
+
+	DomHelper.prototype.inputCheckbox = function(id, valueBinding)
+	{
+		var returnValue = this.d.createElement("input");
+		returnValue.id = id;
+		returnValue.type = "checkbox";
+		returnValue.checked = valueBinding.get();
+		returnValue.onchange = valueBinding.set(returnValue.checked);
 		return returnValue;
 	};
 
@@ -129,6 +136,13 @@ function DomHelper()
 		{
 			returnValue.style.width = widthInPixels + "px";
 		}
+		return returnValue;
+	};
+
+	DomHelper.prototype.label = function(innerHtml)
+	{
+		var returnValue = this.d.createElement("label");
+		returnValue.innerHTML = innerHtml;
 		return returnValue;
 	};
 

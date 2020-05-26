@@ -24,6 +24,13 @@ function Coords(x, y)
 		return this;
 	};
 
+	Coords.prototype.divideScalar = function(scalar)
+	{
+		this.x /= scalar;
+		this.y /= scalar;
+		return this;
+	};
+
 	Coords.prototype.fromGeodesic = function(geodesic)
 	{
 		this.x = geodesic.longitude;
