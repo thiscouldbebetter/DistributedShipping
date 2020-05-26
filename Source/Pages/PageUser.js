@@ -87,8 +87,8 @@ function PageUser(world, user)
 			(
 				dh.button
 				(
-					"Admin Mode",
-					() => alert("todo")
+					"Administrator Mode",
+					() => dh.pageShow( new PageAdmin(this.world, this.user) )
 				)
 			)
 		}

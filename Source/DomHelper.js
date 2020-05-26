@@ -30,6 +30,14 @@ function DomHelper()
 		return returnValue;
 	};
 
+	DomHelper.prototype.canvas = function(size)
+	{
+		var returnValue = this.d.createElement("canvas");
+		returnValue.width = size.x;
+		returnValue.height = size.y;
+		return returnValue;
+	};
+
 	DomHelper.prototype.div = function(children, hasBorder)
 	{
 		var returnValue = this.d.createElement("div");
@@ -53,6 +61,11 @@ function DomHelper()
 	DomHelper.prototype.get = function(id)
 	{
 		return this.d.getElementById(id);
+	};
+
+	DomHelper.prototype.graphicsContextForCanvas = function(canvas)
+	{
+		return canvas.getContext("2d");
 	};
 
 	DomHelper.prototype.heading = function(innerHtml)
