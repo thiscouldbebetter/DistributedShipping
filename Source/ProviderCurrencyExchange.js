@@ -1,5 +1,5 @@
 
-function CurrencyExchangeProvider
+function ProviderCurrencyExchange
 (
 	currencyId,
 	pointsOfferedPerCurrencyUnit,

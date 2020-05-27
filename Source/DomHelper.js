@@ -184,6 +184,7 @@ function DomHelper()
 	{
 		var returnValue = this.d.createElement("select");
 		returnValue.id = id;
+		returnValue.style.width = "256px"; // todo
 		var itemsAsDomElements = items.map( (x) => itemToDomElement(x) );
 		itemsAsDomElements.forEach( (x) => returnValue.appendChild(x) );
 		returnValue.selectedValue = valueBinding.get();

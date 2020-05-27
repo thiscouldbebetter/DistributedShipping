@@ -43,7 +43,7 @@ function PageUser(world, user)
 			dh.br(),
 
 			dh.label("Currency Exchange:"),
-			dh.label(userProvidesCurrencyExchange > 0 ? "Yes" : "No" ),
+			dh.label(userProvidesCurrencyExchange ? "Yes" : "No" ),
 			dh.button
 			(
 				"Details",
@@ -61,20 +61,20 @@ function PageUser(world, user)
 			dh.br(),
 
 			dh.label("Storage:"),
-			dh.label(userProvidesStorage > 0 ? "Yes" : "No" ),
+			dh.label(userProvidesStorage ? "Yes" : "No" ),
 			dh.button
 			(
 				"Details",
-				() => dh.pageShow( new PageProviderStorage(this.world, this.user, user.providerStorage() ) )
+				() => dh.pageShow( new PageProviderStorage(this.world, this.user, this.user.providerStorage() ) )
 			),
 			dh.br(),
 
 			dh.label("Transport:"),
-			dh.label(userProvidesTransport > 0 ? "Yes" : "No" ),
+			dh.label(userProvidesTransport ? "Yes" : "No" ),
 			dh.button
 			(
 				"Details",
-				() => dh.pageShow( new PageProviderTransport(this.world, this.user, user.providerTransport() ) )
+				() => dh.pageShow( new PageProviderTransport(this.world, this.user, this.user.providerTransport() ) )
 			),
 			dh.br(),
 

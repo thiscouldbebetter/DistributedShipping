@@ -15,8 +15,9 @@ function PageProviderStorage(world, user, provider)
 		([
 			dh.heading("Storage Offered by User '" + this.user.username + "'"),
 
-			dh.label("Storage Offerings:"),
-			dh.select
+			dh.label("Offerings:"),
+			dh.br(),
+			dh.selectList
 			(
 				"selectOffer",
 				this.provider.offers,
@@ -24,8 +25,10 @@ function PageProviderStorage(world, user, provider)
 				new DataBinding
 				(
 					this, (c) => c.offerSelectedId, (c, v) => c.offerSelectedId = v
-				)
+				),
+				10  // itemsToShow
 			),
+			dh.br(),
 			dh.button
 			(
 				"Details",

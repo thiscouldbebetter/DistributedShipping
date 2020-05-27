@@ -13,41 +13,65 @@ function User(id, username, passwordHashed, pointsAccrued, isAdmin, address, pro
 {
 	User.prototype.providerCurrencyExchange = function()
 	{
-		return this.providers.filter( (x) => x.constructor.name == CurrencyExchange.name )[0];
+		var returnValue = this.providers.filter( (x) => x.constructor.name == ProviderCurrencyExchange.name )[0];
+		if (returnValue == null)
+		{
+			returnValue = new ProviderCurrencyExchange();
+			this.providers.push(returnValue);
+		}
+		return returnValue;
 	};
 
 	User.prototype.providerProduct = function()
 	{
-		return this.providers.filter( (x) => x.constructor.name == ProductProvider.name )[0];
+		var returnValue = this.providers.filter( (x) => x.constructor.name == ProviderProduct.name )[0];
+		if (returnValue == null)
+		{
+			returnValue = new ProviderProduct();
+			this.providers.push(returnValue);
+		}
+		return returnValue;
 	};
 
 	User.prototype.providerStorage = function()
 	{
-		return this.providers.filter( (x) => x.constructor.name == StorageProvider.name )[0];
+		var returnValue = this.providers.filter( (x) => x.constructor.name == ProviderStorage.name )[0];
+		if (returnValue == null)
+		{
+			returnValue = new ProviderStorage();
+			this.providers.push(returnValue);
+		}
+		return returnValue;
 	};
 
 	User.prototype.providerTransport = function()
 	{
-		return this.providers.filter( (x) => x.constructor.name == TransportProvider.name )[0];
+		var returnValue = this.providers.filter( (x) => x.constructor.name == ProviderTransport.name )[0];
+		if (returnValue == null)
+		{
+			returnValue = new ProviderTransport();
+			this.providers.push(returnValue);
+		}
+		return returnValue;
 	};
 
 	User.prototype.providesCurrencyExchange = function()
 	{
-		return this.providerCurrencyExchange() != null;
+		return this.providers.some(x => x.constructor.name == ProviderCurrencyExchange.name );
 	};
 
 	User.prototype.providesProduct = function()
 	{
-		return this.providerProduct() != null;
+		return this.providers.some(x => x.constructor.name == ProviderProduct.name );
 	};
 
 	User.prototype.providesStorage = function()
 	{
-		return this.providerStorage() != null;
+		return this.providers.some(x => x.constructor.name == ProviderStorage.name );
 	};
 
 	User.prototype.providesTransport = function()
 	{
-		return this.providerTransport != null;
+		return this.providers.some(x => x.constructor.name == ProviderTransport.name );
 	};
 }

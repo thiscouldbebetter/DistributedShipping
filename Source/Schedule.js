@@ -1,8 +1,10 @@
 
-function Schedule(code, periodsAvailable)
+function Schedule(code, startTime, offsetsAvailable, recurrencePeriodInSeconds)
 {
 	this.code = code;
-	this.periodsAvailable = periodsAvailable;
+	this.startTime = startTime;
+	this.offsetsAvailable = offsetsAvailable;
+	this.recurrencePeriodInSeconds = recurrencePeriodInSeconds;
 }
 
 {
@@ -17,18 +19,27 @@ function Schedule(code, periodsAvailable)
 
 	function Schedule_Instances()
 	{
-		var secondsPerMillenium = 1000 * 365.25 * 24 * 60 * 60;
-		this.Default = new Schedule
+		var secondsPerShift = 8 * 60 * 60;
+		var secondsPerDay = 24 * 60 * 60;
+		var secondsPerWeek = 7 * secondsPerDay;
+
+		this.Weekdays9To5 = new Schedule
 		(
-			"Default",
+			"Weekdays9To5",
+			new Date(0), // startTime - todo - Make it a Monday.
 			[
-				new SchedulePeriod(new Date(0), secondsPerMillenium)
-			]
+				new SchedulePeriod(0, secondsPerShift),
+				new SchedulePeriod(secondsPerDay, secondsPerShift),
+				new SchedulePeriod(secondsPerDay, secondsPerShift),
+				new SchedulePeriod(secondsPerDay, secondsPerShift),
+				new SchedulePeriod(secondsPerDay, secondsPerShift),
+			],
+			secondsPerWeek // recurrencePeriodInSeconds
 		);
 
 		this._All =
 		[
-			this.Default,
+			this.Weekdays9To5,
 		].addLookupsByCode();
 	}
 }

@@ -1,6 +1,6 @@
 
-function SchedulePeriod(timeStart, durationInSeconds)
+function SchedulePeriod(offsetInSeconds, durationInSeconds)
 {
-	this.timeStart = timeStart;
+	this.offsetInSeconds = offsetInSeconds;
 	this.durationInSeconds = durationInSeconds;
 }

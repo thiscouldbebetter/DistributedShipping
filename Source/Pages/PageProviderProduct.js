@@ -18,13 +18,16 @@ function PageProviderProduct(world, user, provider)
 			dh.heading("Products Offered by User '" + this.user.username + "'"),
 
 			dh.label("Products Offered:"),
-			dh.select
+			dh.br(),
+			dh.selectList
 			(
 				"selectProduct",
 				productsOffered,
 				(x) => dh.selectOption(x.name, x.name),
-				new DataBinding(this, (c) => c.productId, (c) => c.productId = v)
+				new DataBinding(this, (c) => c.productId, (c) => c.productId = v),
+				10 // itemsToShow
 			),
+			dh.br(),
 			dh.button
 			(
 				"Details",

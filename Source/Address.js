@@ -24,6 +24,22 @@ function Address
 }
 
 {
+	Address.fromString = function(stringToParse)
+	{
+		var fieldsAsStrings = stringToParse.split(" ");
+		return new Address
+		(
+			null, // id
+			fieldsAsStrings[0], // addresseeName
+			fieldsAsStrings[1], // streetNumber
+			fieldsAsStrings[2], // streetName
+			fieldsAsStrings[3], // cityName
+			fieldsAsStrings[4], // provinceCode
+			fieldsAsStrings[5], // countryCode
+			fieldsAsStrings[6], // zoneCode
+		);
+	};
+
 	Address.prototype.country = function(world)
 	{
 		return world.countries[this.countryCode];
@@ -48,6 +64,35 @@ function Address
 			zone.code
 		);
 	};
+
+	Address.prototype.toString = function()
+	{
+		var fields =
+		[
+			this.addresseeName,
+			this.streetNumber,
+			this.streetName,
+			this.cityName,
+			this.provinceCode,
+			this.countryCode,
+			this.zoneCode
+		];
+		var returnValue = fields.join(" ");
+		return returnValue;
+	};
+
+	// Clonable.
+
+	Address.prototype.clone = function()
+	{
+		return new Address
+		(
+			this.id, this.addresseeName, this.streetNumber, this.streetName,
+			this.cityName, this.provinceCode, this.countryCode, this.zoneCode
+		);
+	};
+
+	// Dom.
 
 	Address.prototype.toDomElement = function(world, user)
 	{
